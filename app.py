@@ -99,9 +99,9 @@ def main():
         print("Warning: LLM_API_KEY is not set, the chat will not answer (see .env.example).")
     url = f"http://localhost:{port}"
     print(f"Dashboard: {url}  (Ctrl+C to stop)", flush=True)
-    if os.environ.get("OPEN_BROWSER", "1") == "1":
+    if os.environ.get("OPEN_BROWSER", "0" if os.environ.get("RENDER") else "1") == "1":
         threading.Timer(1.0, webbrowser.open, [url]).start()
-    with make_server(os.environ.get("HOST", "127.0.0.1"), port, application, server_class=_Server, handler_class=_QuietHandler) as server:
+    with make_server(os.environ.get("HOST", "0.0.0.0" if os.environ.get("RENDER") else "127.0.0.1"), port, application, server_class=_Server, handler_class=_QuietHandler) as server:
         try:
             server.serve_forever()
         except KeyboardInterrupt:
