@@ -1,0 +1,129 @@
+{
+  "metrics": {
+    "store": "STORE2",
+    "orders": 9181,
+    "copies_sold": 14053,
+    "total_revenue": 668103.35,
+    "date_from": "2024-11-23",
+    "date_to": "2026-09-17",
+    "top_days": [
+      {
+        "date": "2025-11-16",
+        "revenue": 3789.61
+      },
+      {
+        "date": "2025-12-12",
+        "revenue": 3127.15
+      },
+      {
+        "date": "2025-12-10",
+        "revenue": 3024.52
+      },
+      {
+        "date": "2025-09-19",
+        "revenue": 2938.86
+      },
+      {
+        "date": "2025-11-19",
+        "revenue": 2915.2
+      }
+    ],
+    "unique_users": 3166,
+    "user_records": 3319,
+    "unique_author_sets": 281,
+    "most_popular_author_sets": [
+      {
+        "authors": "Kenneth Hamill & Marcus McKenzie",
+        "copies_sold": 176
+      }
+    ],
+    "most_popular_individual_authors": [
+      {
+        "author": "Kenneth Hamill",
+        "copies_sold": 283
+      }
+    ],
+    "best_buyers": [
+      {
+        "user_ids": [
+          51014
+        ],
+        "total_spent": 1131.07,
+        "names": [
+          "Tod Casper"
+        ],
+        "emails": [
+          "marvel_beahan@ferry.example"
+        ]
+      }
+    ],
+    "data_checks": [
+      {
+        "name": "Every order kept",
+        "status": "ok",
+        "detail": "9,181 of 9,181 orders parsed; 0 dropped"
+      },
+      {
+        "name": "Nothing dated on or after the processing day",
+        "status": "ok",
+        "detail": "0 orders dated 2026-10-29 or later"
+      },
+      {
+        "name": "No one-day revenue spikes",
+        "status": "ok",
+        "detail": "busiest day is 2.4x its surrounding month (alarm above 3x)"
+      },
+      {
+        "name": "Day/month order unambiguous",
+        "status": "ok",
+        "detail": "decided from the data for each date separator"
+      }
+    ],
+    "flagged_days": []
+  },
+  "data_quality": {
+    "orders": {
+      "raw_rows": 9181,
+      "exact_duplicates_removed": 0,
+      "distinct_price_formats": 52,
+      "distinct_timestamp_formats": 1398,
+      "prices_without_currency_assumed_usd": 0,
+      "eur_prices_converted": 2939,
+      "slash_dot_dash_date_orientation": {
+        "/": "month first",
+        ".": "day first"
+      },
+      "invalid_values": {},
+      "rows_dropped_unrecoverable": 0,
+      "duplicate_order_ids_removed": 0,
+      "unit_price_usd_range": [
+        12.0,
+        92.39
+      ],
+      "rows": 9181,
+      "orders_with_unknown_user_id": 0,
+      "orders_with_unknown_book_id": 0
+    },
+    "users": {
+      "raw_rows": 3319,
+      "exact_duplicates_removed": 0,
+      "rows_without_valid_id_dropped": 0,
+      "conflicting_duplicate_ids_removed": 0,
+      "missing_values": {
+        "name": 0,
+        "address": 159,
+        "phone": 0,
+        "email": 0
+      },
+      "rows": 3319,
+      "real_users": 3166
+    },
+    "books": {
+      "raw_rows": 770,
+      "duplicate_ids_removed": 0,
+      "missing_or_invalid_years": 14,
+      "books_without_authors": 0,
+      "rows": 770
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "metrics": {
+    "store": "STORE4",
+    "orders": 10877,
+    "copies_sold": 16599,
+    "total_revenue": 778289.22,
+    "date_from": "2024-11-16",
+    "date_to": "2026-09-18",
+    "top_days": [
+      {
+        "date": "2025-11-24",
+        "revenue": 4372.46
+      },
+      {
+        "date": "2025-11-17",
+        "revenue": 3818.29
+      },
+      {
+        "date": "2025-11-28",
+        "revenue": 3444.83
+      },
+      {
+        "date": "2025-11-13",
+        "revenue": 3401.07
+      },
+      {
+        "date": "2025-09-21",
+        "revenue": 3303.44
+      }
+    ],
+    "unique_users": 2850,
+    "user_records": 3008,
+    "unique_author_sets": 299,
+    "most_popular_author_sets": [
+      {
+        "authors": "Emil Rempel & Heriberto Kutch & Merle Rice",
+        "copies_sold": 198
+      }
+    ],
+    "most_popular_individual_authors": [
+      {
+        "author": "Salvador Osinski",
+        "copies_sold": 235
+      },
+      {
+        "author": "Tai Boyer",
+        "copies_sold": 235
+      },
+      {
+        "author": "Tiffany Wisoky",
+        "copies_sold": 235
+      }
+    ],
+    "best_buyers": [
+      {
+        "user_ids": [
+          53347,
+          54809
+        ],
+        "total_spent": 1265.65,
+        "names": [
+          "Bart Schamberger JD",
+          "Erasmo Hodkiewicz DDS"
+        ],
+        "emails": [
+          "zofia@schaefer.example"
+        ]
+      }
+    ],
+    "data_checks": [
+      {
+        "name": "Every order kept",
+        "status": "ok",
+        "detail": "10,877 of 10,877 orders parsed; 0 dropped"
+      },
+      {
+        "name": "Nothing dated on or after the processing day",
+        "status": "ok",
+        "detail": "0 orders dated 2026-10-29 or later"
+      },
+      {
+        "name": "No one-day revenue spikes",
+        "status": "ok",
+        "detail": "busiest day is 1.9x its surrounding month (alarm above 3x)"
+      },
+      {
+        "name": "Day/month order unambiguous",
+        "status": "ok",
+        "detail": "decided from the data for each date separator"
+      }
+    ],
+    "flagged_days": []
+  },
+  "data_quality": {
+    "orders": {
+      "raw_rows": 10877,
+      "exact_duplicates_removed": 0,
+      "distinct_price_formats": 52,
+      "distinct_timestamp_formats": 1530,
+      "prices_without_currency_assumed_usd": 0,
+      "eur_prices_converted": 3489,
+      "slash_dot_dash_date_orientation": {
+        "/": "month first",
+        ".": "day first"
+      },
+      "invalid_values": {},
+      "rows_dropped_unrecoverable": 0,
+      "duplicate_order_ids_removed": 0,
+      "unit_price_usd_range": [
+        12.0,
+        92.39
+      ],
+      "rows": 10877,
+      "orders_with_unknown_user_id": 0,
+      "orders_with_unknown_book_id": 0
+    },
+    "users": {
+      "raw_rows": 3008,
+      "exact_duplicates_removed": 0,
+      "rows_without_valid_id_dropped": 0,
+      "conflicting_duplicate_ids_removed": 0,
+      "missing_values": {
+        "name": 0,
+        "address": 121,
+        "phone": 0,
+        "email": 0
+      },
+      "rows": 3008,
+      "real_users": 2850
+    },
+    "books": {
+      "raw_rows": 775,
+      "duplicate_ids_removed": 0,
+      "missing_or_invalid_years": 19,
+      "books_without_authors": 0,
+      "rows": 775
+    }
+  }
+}

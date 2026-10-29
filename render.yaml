@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: bookstore-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python pipeline.py
+    startCommand: python app.py
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: OPEN_BROWSER
+        value: "0"
+      - key: LLM_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai/
+      - key: LLM_MODEL
+        value: gemini-flash-latest
+      - key: LLM_API_KEY
+        sync: false

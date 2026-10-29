@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookstore sales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f4f6f8; --panel: #ffffff; --ink: #1c2333; --muted: #5d6676; --rule: #d9dee5;
+  --green: #1f6f5c; --on-green: #ffffff; --green-soft: #e3f0ec; --brass: #8a6a1f; --brass-soft: #f6efdc; --warn: #a2471f; --warn-soft: #f8e7df;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161d; --panel: #1a2029; --ink: #e5e8ed; --muted: #9aa3b2; --rule: #2d3542;
+    --green: #5cbf9f; --on-green: #0d1f19; --green-soft: #18332c; --brass: #d6b25e; --brass-soft: #332a14; --warn: #ec9370; --warn-soft: #3a2219;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; height: 100vh; }
+main { overflow-y: auto; padding: 24px 32px 48px; }
+header.top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+header.top h1 { font: 600 26px/1.2 var(--serif); margin: 0; }
+header.top .range { color: var(--muted); }
+nav.stores { margin-left: auto; display: inline-flex; max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--panel); }
+nav.stores button { white-space: nowrap; border: 0; border-left: 1px solid var(--rule); background: none; padding: 7px 14px; cursor: pointer; color: var(--muted); font-weight: 500; }
+nav.stores button:first-child { border-left: 0; }
+nav.stores button[aria-selected="true"] { background: var(--green); color: var(--on-green); }
+.ledger { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; }
+.ledger > div { padding: 18px 20px; border-left: 1px solid var(--rule); min-width: 0; }
+.ledger > div:first-child { border-left: 0; }
+.ledger h2 { margin: 0 0 6px; font: 500 13px/1.3 var(--sans); color: var(--muted); }
+.ledger .value { font: 600 34px/1.1 var(--serif); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ledger .value.text { font-size: 19px; line-height: 1.3; }
+.ledger .value.ids { font: 600 18px/1.35 var(--sans); color: var(--brass); font-variant-numeric: tabular-nums; }
+.ledger .note { margin-top: 6px; color: var(--muted); font-size: 13px; }
+.totals { display: flex; gap: 28px; flex-wrap: wrap; margin: 12px 4px 12px; color: var(--muted); font-size: 14px; }
+.checks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 22px; }
+.check { display: flex; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--green-soft); font-size: 13px; line-height: 1.4; min-width: 0; }
+.check.bad { background: var(--warn-soft); }
+.check .mark { font-weight: 700; color: var(--green); }
+.check.bad .mark { color: var(--warn); }
+.check b { display: block; font-weight: 600; }
+.check span { color: var(--muted); }
+.totals b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+nav.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
+nav.tabs button { white-space: nowrap; border: 0; background: none; padding: 9px 14px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--green); font-weight: 600; }
+nav.tabs .count { font-size: 12px; color: var(--green); margin-left: 4px; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+.panel h3 { margin: 0 0 12px; font: 600 17px/1.3 var(--serif); }
+.chart-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.chart-head h3 { margin: 0 auto 0 0; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 5px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--green); color: var(--on-green); }
+.chart-head input { border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; background: var(--panel); }
+.linkish { border: 0; background: none; color: var(--green); cursor: pointer; padding: 4px 6px; }
+.chart-box { position: relative; height: 320px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; font-size: 13px; color: var(--muted); white-space: nowrap; }
+td.num, th.num { text-align: right; }
+.data-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+.data-wrap th { cursor: pointer; position: sticky; top: 0; background: var(--panel); }
+.data-wrap td { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; min-height: 32px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--green-soft); color: var(--ink); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 13px; max-width: 100%; }
+.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip button { border: 0; background: none; cursor: pointer; padding: 0 6px; font-size: 16px; line-height: 1; color: var(--muted); }
+.toolbar .count { margin-left: auto; color: var(--muted); font-size: 13px; }
+.pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 10px; color: var(--muted); font-size: 13px; }
+.pager button { border: 1px solid var(--rule); background: var(--panel); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.pager button:disabled { opacity: .4; cursor: default; }
+details.quality { color: var(--muted); font-size: 13px; }
+details.quality pre { white-space: pre-wrap; font-size: 12px; }
+aside.chat { display: flex; flex-direction: column; border-left: 1px solid var(--rule); background: var(--panel); min-height: 0; }
+.chat-head { padding: 20px 20px 12px; border-bottom: 1px solid var(--rule); }
+.chat-head h2 { margin: 0; font: 600 19px/1.3 var(--serif); }
+.chat-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.msg { max-width: 100%; }
+.msg.user { align-self: flex-end; background: var(--green); color: var(--on-green); padding: 8px 12px; border-radius: 12px 12px 2px 12px; max-width: 85%; white-space: pre-wrap; }
+.msg.bot .text { line-height: 1.55; overflow-wrap: anywhere; }
+.msg.bot .text p { margin: 0 0 8px; }
+.msg.bot .text ul { margin: 0 0 8px; padding-left: 20px; }
+.msg.bot code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 13px; }
+.stamp { display: inline-block; margin-top: 6px; font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.stamp.ok { background: var(--green-soft); color: var(--green); }
+.stamp.bad { background: var(--warn-soft); color: var(--warn); }
+.msg details { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.msg details summary { cursor: pointer; }
+.step { margin: 8px 0 0; border-left: 2px solid var(--rule); padding-left: 10px; }
+.step .call { color: var(--ink); overflow-wrap: anywhere; }
+.step.err .call { color: var(--warn); }
+.step pre { margin: 4px 0 0; max-height: 160px; overflow: auto; white-space: pre-wrap; font-size: 12px; background: var(--bg); padding: 6px 8px; border-radius: 6px; }
+.pending { color: var(--muted); font-style: italic; }
+.suggestions { display: flex; flex-direction: column; gap: 8px; }
+.suggestions p { margin: 0 0 4px; color: var(--muted); font-size: 13px; }
+.suggestions button { text-align: left; border: 1px solid var(--rule); background: var(--bg); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.suggestions button:hover { border-color: var(--green); }
+form.ask { display: flex; gap: 8px; padding: 12px 20px 20px; border-top: 1px solid var(--rule); }
+form.ask textarea { flex: 1; resize: none; height: 64px; border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; background: var(--bg); }
+form.ask button { border: 0; background: var(--green); color: var(--on-green); border-radius: 8px; padding: 0 16px; cursor: pointer; font-weight: 600; }
+form.ask button:disabled { opacity: .5; cursor: default; }
+.empty { color: var(--muted); padding: 40px 0; }
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: minmax(0, 1fr); height: auto; }
+  main { overflow: visible; padding: 16px; }
+  aside.chat { border-left: 0; border-top: 1px solid var(--rule); height: 80vh; }
+  .ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ledger > div:nth-child(3) { border-left: 0; }
+  .ledger > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .checks { grid-template-columns: 1fr; }
+  .two { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <main>
+    <header class="top">
+      <h1>Bookstore sales</h1>
+      <span class="range" id="range"></span>
+      <nav class="stores" id="stores" role="tablist" aria-label="Store"></nav>
+    </header>
+    <div id="content">
+      <section class="ledger" aria-label="Key results">
+        <div><h2>Unique users</h2><div class="value" id="k-users">–</div><div class="note" id="k-users-note"></div></div>
+        <div><h2>Unique author sets</h2><div class="value" id="k-sets">–</div><div class="note">distinct combinations of co-authors</div></div>
+        <div><h2>Most popular author(s)</h2><div class="value text" id="k-author">–</div><div class="note" id="k-author-note"></div></div>
+        <div><h2>Best buyer (all user ids)</h2><div class="value ids" id="k-buyer">–</div><div class="note" id="k-buyer-note"></div></div>
+      </section>
+      <div class="totals" id="totals"></div>
+      <section class="checks" id="checks" aria-label="Data checks"></section>
+      <nav class="tabs" id="tabs" role="tablist"></nav>
+      <section id="overview">
+        <div class="panel">
+          <div class="chart-head">
+            <h3>Daily revenue</h3>
+            <div class="seg" id="gran" role="group" aria-label="Granularity">
+              <button data-g="day">Day</button><button data-g="week">Week</button><button data-g="month">Month</button>
+            </div>
+            <input type="date" id="from" aria-label="From"> <input type="date" id="to" aria-label="To">
+            <button class="linkish" id="reset-chart">Full range</button>
+          </div>
+          <div class="chart-box"><canvas id="chart" aria-label="Daily revenue chart" role="img"></canvas></div>
+        </div>
+        <div class="two">
+          <div class="panel"><h3>Top 5 days by revenue</h3><table id="top-days"></table></div>
+          <div class="panel"><h3>Best buyer details</h3><div id="buyer-details"></div></div>
+        </div>
+        <details class="quality panel"><summary>Data cleaning report</summary><pre id="quality"></pre></details>
+      </section>
+      <section id="table-view" hidden>
+        <div class="toolbar" id="toolbar"></div>
+        <div class="data-wrap"><table id="data"></table></div>
+        <div class="pager" id="pager"></div>
+      </section>
+    </div>
+  </main>
+  <aside class="chat" aria-label="Assistant">
+    <div class="chat-head">
+      <h2>Ask the data</h2>
+      <p>Questions are answered from exact queries; commands change the dashboard.</p>
+    </div>
+    <div class="messages" id="messages" aria-live="polite">
+      <div class="suggestions" id="suggestions">
+        <p>Try one of these:</p>
+        <button>How many real unique users are there, and how many user records?</button>
+        <button>Who is the best buyer and how much did they spend?</button>
+        <button>What was the revenue in September 2025 by week?</button>
+        <button>Filter out books that have people names in the title</button>
+        <button>Select users with e-mails started with s or p</button>
+        <button>Show monthly revenue for the last three months</button>
+      </div>
+    </div>
+    <form class="ask" id="ask">
+      <textarea id="input" placeholder="Ask a question or give a command" aria-label="Message"></textarea>
+      <button type="submit" id="send">Send</button>
+    </form>
+  </aside>
+</div>
+<script>
+const TABLES = ["orders", "users", "customers", "books"];
+const TAB_NAMES = {overview: "Overview", orders: "Orders", users: "Users", customers: "Customers", books: "Books"};
+const money = new Intl.NumberFormat("en-US", {style: "currency", currency: "USD"});
+const int = new Intl.NumberFormat("en-US");
+const $ = (s) => document.querySelector(s);
+let state = null, summary = null, chart = null, page = 1, chatLog = [], busy = false;
+
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)};
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({error: res.statusText}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function freshState(store) {
+  return {store, view: "overview", filters: Object.fromEntries(TABLES.map(t => [t, []])),
+          sort: Object.fromEntries(TABLES.map(t => [t, null])), chart: {start: null, end: null, granularity: "day"}};
+}
+
+async function init() {
+  const {stores} = await api("/api/stores");
+  if (!stores.length) { $("#content").innerHTML = '<p class="empty">No data yet. Copy the STORE1 folder into <code>data/</code> and restart the app.</p>'; return; }
+  $("#stores").innerHTML = stores.map(s => `<button role="tab" data-store="${esc(s)}">${esc(s)}</button>`).join("");
+  const fromLink = decodeURIComponent(location.hash.slice(1));
+  state = freshState(stores.includes(fromLink) ? fromLink : stores[0]);
+  await loadSummary();
+  render();
+}
+
+async function loadSummary() {
+  document.querySelectorAll("#stores button").forEach(b => b.setAttribute("aria-selected", b.dataset.store === state.store));
+  window.history.replaceState(null, "", "#" + encodeURIComponent(state.store));
+  summary = await api(`/api/summary?store=${encodeURIComponent(state.store)}`);
+  const m = summary.metrics;
+  $("#range").textContent = `${m.date_from} to ${m.date_to}`;
+  $("#k-users").textContent = int.format(m.unique_users);
+  $("#k-users-note").textContent = `from ${int.format(m.user_records)} user records`;
+  $("#k-sets").textContent = int.format(m.unique_author_sets);
+  $("#k-author").textContent = m.most_popular_author_sets.map(a => a.authors).join("; ");
+  const solo = m.most_popular_individual_authors;
+  $("#k-author-note").textContent = (m.most_popular_author_sets.length ? `${int.format(m.most_popular_author_sets[0].copies_sold)} copies sold. ` : "") +
+    (solo.length ? `Best single author: ${solo.map(a => a.author).join(", ")} (${int.format(solo[0].copies_sold)} incl. co-written)` : "");
+  $("#k-buyer").textContent = m.best_buyers.map(b => `[${b.user_ids.join(", ")}]`).join(" ");
+  $("#k-buyer-note").textContent = m.best_buyers.length ? `spent ${money.format(m.best_buyers[0].total_spent)}` : "";
+  $("#totals").innerHTML = `<span>Revenue <b>${money.format(m.total_revenue)}</b></span><span>Orders <b>${int.format(m.orders)}</b></span><span>Books sold <b>${int.format(m.copies_sold)}</b></span>`;
+  $("#top-days").innerHTML = `<tr><th>Date</th><th class="num">Revenue</th></tr>` +
+    m.top_days.map(d => `<tr><td>${esc(d.date)}</td><td class="num">${money.format(d.revenue)}</td></tr>`).join("");
+  $("#buyer-details").innerHTML = m.best_buyers.map(b => `<p><b>User ids:</b> [${b.user_ids.join(", ")}]<br><b>Spent:</b> ${money.format(b.total_spent)}<br><b>Names:</b> ${esc(b.names.join(", ") || "unknown")}<br><b>E-mails:</b> ${esc(b.emails.join(", ") || "unknown")}</p>`).join("");
+  $("#quality").textContent = JSON.stringify(summary.quality, null, 2);
+  $("#checks").innerHTML = m.data_checks.map(c => `<div class="check ${c.status === "ok" ? "" : "bad"}"><span class="mark" aria-hidden="true">${c.status === "ok" ? "✓" : "!"}</span><div><b>${esc(c.name)}</b><span>${esc(c.detail)}</span></div></div>`).join("");
+}
+
+function render() {
+  $("#tabs").innerHTML = Object.entries(TAB_NAMES).map(([v, name]) => {
+    const n = v === "overview" ? 0 : state.filters[v].length;
+    return `<button role="tab" data-view="${v}" aria-selected="${state.view === v}">${name}${n ? `<span class="count">${n} filter${n > 1 ? "s" : ""}</span>` : ""}</button>`;
+  }).join("");
+  const overview = state.view === "overview";
+  $("#overview").hidden = !overview;
+  $("#table-view").hidden = overview;
+  if (overview) renderChart(); else loadTable();
+}
+
+function bucket(date, g) {
+  if (g === "month") return date.slice(0, 7);
+  if (g === "week") {
+    const d = new Date(date + "T00:00:00Z");
+    d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7);
+    return d.toISOString().slice(0, 10);
+  }
+  return date;
+}
+
+function renderChart() {
+  const c = state.chart;
+  document.querySelectorAll("#gran button").forEach(b => b.setAttribute("aria-pressed", b.dataset.g === c.granularity));
+  $("#from").value = c.start || ""; $("#to").value = c.end || "";
+  const sums = new Map();
+  for (const d of summary.daily) {
+    if ((c.start && d.date < c.start) || (c.end && d.date > c.end)) continue;
+    const k = bucket(d.date, c.granularity);
+    sums.set(k, Math.round(((sums.get(k) || 0) + d.revenue) * 100) / 100);
+  }
+  const labels = [...sums.keys()], values = [...sums.values()];
+  const flagged = new Set(summary.metrics.flagged_days.map(d => bucket(d, c.granularity)));
+  const css = getComputedStyle(document.documentElement);
+  const green = css.getPropertyValue("--green").trim(), muted = css.getPropertyValue("--muted").trim(), rule = css.getPropertyValue("--rule").trim(), warn = css.getPropertyValue("--warn").trim();
+  const small = labels.length > 60 ? 0 : 3;
+  if (!window.Chart) { $(".chart-box").textContent = "The chart library could not load (no internet?)."; return; }
+  if (chart) chart.destroy();
+  chart = new Chart($("#chart"), {
+    type: "line",
+    data: {labels, datasets: [{label: "Revenue", data: values, borderColor: green, borderWidth: 1.6, tension: 0.2,
+      pointRadius: labels.map(l => flagged.has(l) ? 6 : small), pointBackgroundColor: labels.map(l => flagged.has(l) ? warn : green), pointBorderColor: labels.map(l => flagged.has(l) ? warn : green)}]},
+    options: {responsive: true, maintainAspectRatio: false, animation: false, interaction: {mode: "index", intersect: false},
+      plugins: {legend: {display: false}, tooltip: {callbacks: {label: (ctx) => money.format(ctx.parsed.y) + (flagged.has(ctx.label) ? " (suspicious spike)" : "")}}},
+      scales: {x: {ticks: {color: muted, maxTicksLimit: 12}, grid: {color: rule}},
+               y: {ticks: {color: muted, callback: (v) => money.format(v)}, grid: {color: rule}}}}
+  });
+}
+
+async function loadTable() {
+  const table = state.view;
+  let data;
+  try { data = await api("/api/table", {state, table, page, page_size: 25}); }
+  catch (e) { $("#data").innerHTML = `<tr><td>${esc(e.message)}</td></tr>`; return; }
+  page = data.page;
+  const chips = state.filters[table].map((f, i) => `<span class="chip" title="${esc(f.label)}"><span>${esc(f.label)}</span><button data-remove="${i}" aria-label="Remove filter">×</button></span>`).join("");
+  $("#toolbar").innerHTML = chips + (chips ? `<button class="linkish" id="clear">Clear filters</button>` : "") +
+    `<span class="count">${int.format(data.filtered)} of ${int.format(data.total)} rows</span>` +
+    data.errors.map(e => `<span class="stamp bad">${esc(e)}</span>`).join("");
+  const sort = data.sort;
+  const numeric = new Set(data.columns.filter(c => data.rows.some(r => typeof r[c] === "number")));
+  $("#data").innerHTML = `<thead><tr>${data.columns.map(c => `<th class="${numeric.has(c) ? "num" : ""}" data-col="${esc(c)}">${esc(c)}${sort && sort.column === c ? (sort.descending ? " ↓" : " ↑") : ""}</th>`).join("")}</tr></thead><tbody>` +
+    (data.rows.length ? data.rows.map(r => `<tr>${data.columns.map(c => `<td class="${numeric.has(c) ? "num" : ""}" title="${esc(r[c])}">${esc(r[c])}</td>`).join("")}</tr>`).join("")
+                      : `<tr><td colspan="${data.columns.length}" class="empty">No rows match the current filters.</td></tr>`) + "</tbody>";
+  $("#pager").innerHTML = `<button data-page="${page - 1}" ${page <= 1 ? "disabled" : ""}>Previous</button> Page ${page} of ${data.pages} <button data-page="${page + 1}" ${page >= data.pages ? "disabled" : ""}>Next</button>`;
+}
+
+function markdown(text) {
+  const out = [];
+  let list = false;
+  for (const line of esc(text).split("\n")) {
+    const item = line.match(/^\s*[-*•]\s+(.*)$/);
+    if (item && !list) { out.push("<ul>"); list = true; }
+    if (!item && list) { out.push("</ul>"); list = false; }
+    const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
+    if (item) out.push(`<li>${inline(item[1])}</li>`);
+    else if (line.trim()) out.push(`<p>${inline(line)}</p>`);
+  }
+  if (list) out.push("</ul>");
+  return out.join("");
+}
+
+function addMessage(cls, html) {
+  $("#suggestions")?.remove();
+  const div = document.createElement("div");
+  div.className = `msg ${cls}`;
+  div.innerHTML = html;
+  $("#messages").appendChild(div);
+  $("#messages").scrollTop = $("#messages").scrollHeight;
+  return div;
+}
+
+function botHtml(r) {
+  let stamp = "";
+  if (r.error) stamp = `<span class="stamp bad">not answered</span>`;
+  else if (r.verified) stamp = `<span class="stamp ok">✓ every number checked against tool results</span>`;
+  else if (r.unverified_numbers?.length) stamp = `<span class="stamp bad">unverified: ${esc(r.unverified_numbers.join(", "))}</span>`;
+  const steps = (r.steps || []).map(s => `<div class="step ${s.error ? "err" : ""}"><div class="call">${esc(s.tool)}(${esc(JSON.stringify(s.args))})</div><pre>${esc(s.result)}</pre></div>`).join("");
+  return `<div class="text">${markdown(r.answer)}</div>${stamp}` + (steps ? `<details><summary>${r.steps.length} tool call${r.steps.length > 1 ? "s" : ""}</summary>${steps}</details>` : "");
+}
+
+async function send(text) {
+  if (busy || !text.trim() || !state) return;
+  busy = true; $("#send").disabled = true;
+  addMessage("user", esc(text));
+  const pending = addMessage("bot", `<span class="pending">Working on it…</span>`);
+  try {
+    const r = await api("/api/chat", {state, history: chatLog.slice(-12), message: text});
+    pending.innerHTML = botHtml(r);
+    chatLog.push({role: "user", content: text}, {role: "assistant", content: r.answer});
+    const storeChanged = r.state.store !== state.store;
+    state = r.state; page = 1;
+    if (storeChanged) await loadSummary();
+    render();
+  } catch (e) {
+    pending.innerHTML = `<span class="stamp bad">${esc(e.message)}</span>`;
+  } finally {
+    busy = false; $("#send").disabled = false;
+    $("#messages").scrollTop = $("#messages").scrollHeight;
+  }
+}
+
+$("#tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-view]"); if (b) { state.view = b.dataset.view; page = 1; render(); } });
+$("#gran").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { state.chart.granularity = b.dataset.g; renderChart(); } });
+$("#from").addEventListener("change", (e) => { state.chart.start = e.target.value || null; renderChart(); });
+$("#to").addEventListener("change", (e) => { state.chart.end = e.target.value || null; renderChart(); });
+$("#reset-chart").addEventListener("click", () => { state.chart = {start: null, end: null, granularity: state.chart.granularity}; renderChart(); });
+$("#stores").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-store]");
+  if (b && b.dataset.store !== state.store) { state = freshState(b.dataset.store); page = 1; await loadSummary(); render(); }
+});
+$("#toolbar").addEventListener("click", (e) => {
+  const rm = e.target.closest("button[data-remove]");
+  if (rm) { state.filters[state.view].splice(Number(rm.dataset.remove), 1); page = 1; render(); }
+  if (e.target.id === "clear") { state.filters[state.view] = []; page = 1; render(); }
+});
+$("#data").addEventListener("click", (e) => {
+  const th = e.target.closest("th[data-col]");
+  if (!th) return;
+  const cur = state.sort[state.view];
+  state.sort[state.view] = {column: th.dataset.col, descending: cur && cur.column === th.dataset.col ? !cur.descending : false};
+  loadTable();
+});
+$("#pager").addEventListener("click", (e) => { const b = e.target.closest("button[data-page]"); if (b && !b.disabled) { page = Number(b.dataset.page); loadTable(); } });
+$("#messages").addEventListener("click", (e) => { const b = e.target.closest(".suggestions button"); if (b) send(b.textContent); });
+$("#ask").addEventListener("submit", (e) => { e.preventDefault(); const t = $("#input").value; $("#input").value = ""; send(t); });
+$("#input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#ask").requestSubmit(); } });
+init().catch(e => { $("#content").innerHTML = `<p class="empty">${esc(e.message)}</p>`; });
+</script>
+</body>
+</html>

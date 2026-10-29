@@ -1,0 +1,131 @@
+{
+  "metrics": {
+    "store": "STORE5",
+    "orders": 9714,
+    "copies_sold": 14839,
+    "total_revenue": 704421.69,
+    "date_from": "2024-11-10",
+    "date_to": "2026-09-16",
+    "top_days": [
+      {
+        "date": "2025-10-20",
+        "revenue": 3491.85
+      },
+      {
+        "date": "2025-11-28",
+        "revenue": 3268.26
+      },
+      {
+        "date": "2025-09-27",
+        "revenue": 3190.5
+      },
+      {
+        "date": "2025-10-17",
+        "revenue": 3165.18
+      },
+      {
+        "date": "2025-12-05",
+        "revenue": 3121.92
+      }
+    ],
+    "unique_users": 2987,
+    "user_records": 3158,
+    "unique_author_sets": 311,
+    "most_popular_author_sets": [
+      {
+        "authors": "Dulcie Bode",
+        "copies_sold": 169
+      }
+    ],
+    "most_popular_individual_authors": [
+      {
+        "author": "Valentin Kutch",
+        "copies_sold": 292
+      }
+    ],
+    "best_buyers": [
+      {
+        "user_ids": [
+          52895,
+          53969
+        ],
+        "total_spent": 1365.91,
+        "names": [
+          "Ms. Barabara Johnson",
+          "Shakira Simonis"
+        ],
+        "emails": [
+          "britt_aufderhar@ankunding.test"
+        ]
+      }
+    ],
+    "data_checks": [
+      {
+        "name": "Every order kept",
+        "status": "ok",
+        "detail": "9,714 of 9,714 orders parsed; 0 dropped"
+      },
+      {
+        "name": "Nothing dated on or after the processing day",
+        "status": "ok",
+        "detail": "0 orders dated 2026-10-29 or later"
+      },
+      {
+        "name": "No one-day revenue spikes",
+        "status": "ok",
+        "detail": "busiest day is 2.2x its surrounding month (alarm above 3x)"
+      },
+      {
+        "name": "Day/month order unambiguous",
+        "status": "ok",
+        "detail": "decided from the data for each date separator"
+      }
+    ],
+    "flagged_days": []
+  },
+  "data_quality": {
+    "orders": {
+      "raw_rows": 9714,
+      "exact_duplicates_removed": 0,
+      "distinct_price_formats": 52,
+      "distinct_timestamp_formats": 1435,
+      "prices_without_currency_assumed_usd": 0,
+      "eur_prices_converted": 2984,
+      "slash_dot_dash_date_orientation": {
+        "/": "month first",
+        ".": "day first"
+      },
+      "invalid_values": {},
+      "rows_dropped_unrecoverable": 0,
+      "duplicate_order_ids_removed": 0,
+      "unit_price_usd_range": [
+        12.0,
+        92.39
+      ],
+      "rows": 9714,
+      "orders_with_unknown_user_id": 0,
+      "orders_with_unknown_book_id": 0
+    },
+    "users": {
+      "raw_rows": 3158,
+      "exact_duplicates_removed": 0,
+      "rows_without_valid_id_dropped": 0,
+      "conflicting_duplicate_ids_removed": 0,
+      "missing_values": {
+        "name": 0,
+        "address": 152,
+        "phone": 0,
+        "email": 0
+      },
+      "rows": 3158,
+      "real_users": 2987
+    },
+    "books": {
+      "raw_rows": 750,
+      "duplicate_ids_removed": 0,
+      "missing_or_invalid_years": 10,
+      "books_without_authors": 0,
+      "rows": 750
+    }
+  }
+}
